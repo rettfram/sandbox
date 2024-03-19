@@ -1,0 +1,103 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+
+customElements.define('exp-05', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const fadeArr = [...this.querySelectorAll('.fade')] as HTMLElement[]
+    const h1 = this.querySelector('h1') as HTMLElement
+
+    const tl = gsap.timeline({
+      defaults: {
+        ease: 'expo.out'
+      }
+    })
+
+    tl
+    .to(fadeArr, {
+      stagger: .1,
+      scaleY: 1,
+    })
+    .to(h1, {
+      ease: 'elastic.out(1, 0.5)',
+      duration: 2,
+      translateX: 0,
+    }, '-=.5')
+    .to(fadeArr[0], {
+      scaleY: 0,
+      transformOrigin: "top"
+    })
+    .to(fadeArr[2], {
+      scaleY: 0,
+      transformOrigin: "bottom"
+    }, '-=.5')
+    .to(fadeArr[1], {
+      width: '100vw',
+      height: '100vh',
+    }, '-=.5')
+    .to(h1, {
+      scale: 1.5
+    }, '-=.5')
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-05>
+    <div class="fade-container">
+      <div class="fade fade1"></div>
+      <div class="fade fade2"></div>
+      <div class="fade fade3"></div>
+    </div>
+    <div class="mask">
+      <h1>fœrr</h1>
+    </div>
+  </exp-05>
+</MainLayout>
+
+<style>
+  exp-05 {
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    place-content: center;
+    .fade-container {
+      display: grid;
+      grid-template-rows: 1fr 1fr 1fr;
+      grid-template-columns: 1fr;
+      width: 90vw;
+      height: 90vh;
+      overflow: hidden;
+      * {
+        transform-origin: top;
+        transform: scaleY(0);
+      }
+      .fade1 {
+        background-color: var(--color-accent);
+      }
+      .fade2 {
+        background-color: var(--color-dimmed);
+      }
+      .fade3 {
+        background-color: var(--color-accent);
+      }
+    }
+    .mask {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      overflow: hidden;
+      h1 {
+        z-index: 1;
+        transform: translateX(-100%);
+        padding: var(--space-scaled);
+      }
+    }
+  }
+</style>

@@ -1,0 +1,38 @@
+---
+import '@fontsource-variable/inconsolata';
+import '@fontsource-variable/montserrat';
+import '../styles/global.css'
+
+import { ViewTransitions } from 'astro:transitions';
+---
+
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="viewport" content="width=device-width" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Astro</title>
+		<ViewTransitions />
+	</head>
+	<body>
+		<slot />
+
+		<style is:global>
+			:root {
+				--font-family-text: 'Montserrat Variable', sans-serif;
+				--font-family-headings: 'Montserrat Variable', sans-serif;
+				--font-family-monospace: 'Inconsolata', monospace;
+			}
+			body {
+			  color: var(--color-text);
+  			background: var(--color-background);
+			}
+		</style>
+
+		<script>
+			import "../scripts/lenis.js"
+		</script>
+	</body>
+</html>
+

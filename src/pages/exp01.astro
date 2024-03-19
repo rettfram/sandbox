@@ -1,0 +1,66 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+
+customElements.define('exp-01', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const progress = this.querySelector('.progress') as HTMLElement
+    const text = this.querySelector('.text') as HTMLElement
+    
+    gsap.to(progress, {
+      duration: 2,
+      ease: "expo.out",
+      width: '100%',
+    })
+
+    gsap.from(text, {
+      duration: 2,
+      ease: "elastic.out(1,0.3)",
+      y: '-20%',
+    })
+
+    gsap.to(progress, {
+      delay: 2,
+      height: '100%',
+      top: 0,
+      background: "var(--color-dimmed)"
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-01>
+    <h1 class="text">eittsvat</h1>
+    <div class="progress"></div>
+  </exp-01>
+</MainLayout>
+
+<style>
+  exp-01 {
+    display: block;
+    width: 100%;
+    height: 100vh;
+    h1 {
+      font-size: 20rem;
+      text-align: center;
+      opacity: 0.1;
+      width: 100%;
+      position: absolute;
+      top: 35vh;
+    }
+    .progress {
+      background: var(--color-accent);
+      height: 3px;
+      width: 0%;
+      position: absolute;
+      top: 50%;
+      left: 0;
+    }
+  }
+</style>

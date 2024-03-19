@@ -1,0 +1,190 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-14', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const slider = this.querySelector('.slider') as HTMLElement
+    const sectionArr = [...this.querySelectorAll('.slider section')] as HTMLElement[]
+    const progress = this.querySelector('.progress-inner') as HTMLElement
+
+    let tl1 = gsap.timeline({
+      scrollTrigger: {
+        trigger: slider,
+        pin: true,
+        scrub: 1,
+        end: () => '+=' + slider.offsetWidth
+      },
+      defaults: {
+        ease: 'none'
+      }
+    })
+
+    tl1
+      .to(slider, {
+        x: -slider.offsetWidth + window.innerWidth
+      })
+      .to(progress, {
+        scaleX: 1,
+        scrollTrigger: {
+          scrub: 1 / (sectionArr.length)
+        }
+      })
+
+    sectionArr.forEach((section, index) => {
+      const h2 = section.querySelector('h2') as HTMLElement
+      const p = section.querySelector('p') as HTMLElement
+      const mask = section.querySelector('.mask') as HTMLElement
+
+      const tl2 = gsap.timeline({
+        scrollTrigger: {
+          trigger: section,
+          containerAnimation: tl1,
+          start: '0 50%',
+          end: '50% 0%',
+          toggleActions: 'play none none reverse'
+        },
+        defaults: {
+          ease: 'expo.out',
+          duration: 1,
+        }
+      })
+
+      tl2
+        .from(h2, {
+          yPercent: 100,
+          opacity: 0,
+        })
+        .from(p, {
+          yPercent: 100,
+          opacity: 0,
+        }, '<')
+        .to(document.body, {
+          backgroundColor: section.dataset.bgColor
+        }, '<')
+        .from(mask, {
+          scrollTrigger: {
+            containerAnimation: tl1,
+            trigger: mask,
+            start: '-50%, 50%',
+            end: '100%, 75%',
+            scrub: 1,
+            toggleActions: 'play none none reverse'
+          },
+          clipPath: 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)'
+        }, '<')
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-14>
+    <a href="#">setja</a>
+    <div class="progress-outer">
+      <div class="progress-inner"></div>
+    </div>
+    <main>
+      <div class="scroll">
+        <div class="slider">
+          <section data-bg-color="#000000">
+            <div>
+              <h2>hagr</h2>
+              <p>Á himinsbláum völlum vekur vindur vonskur vötnin vaka. Ískalt íssnar í árdaga, árdaga ágætra æsir hljóta hermenn hölda. Hugurinn hvílir í hirðum heimanna, heimanna herja, hjarta hjartað hugsa</p>
+            </div>
+            <div class="mask">
+              <img src="/images/img11.webp" alt="Abstract image">
+            </div>
+          </section>
+          <section data-bg-color="#1f1f1f"> 
+            <div>
+              <h2>valr</h2>
+              <p>Í hverju kvöldi kveikja eld álfar, álfar ala álfheimi. Óðinn ok öldungar örlögum stýra, stýra stjörnum stöðugum. Stundum stökkva steinar í straumnum, straumnum stórjurtar standa stoltar</p>
+            </div>
+            <div class="mask">
+              <img src="/images/img12.webp" alt="Abstract image">
+            </div>
+          </section>
+          <section data-bg-color="#0f0f0f">
+            <div>
+              <h2>þverr</h2>
+              <p>Yfir velli vaka valhöllar menn, menn mæta með mönnum mæla. Mörgum virðing veita vínar, vísindavef vefja vígvellir. Vargarnir vinna við vetrarströndir, ströndir stinnar, stundum stauð af stjörnum</p>
+            </div>
+            <div class="mask">
+              <img src="/images/img13.webp" alt="Abstract image">
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </exp-14>
+</MainLayout>
+
+<style>
+  exp-14 {
+    display: grid;
+    a {
+      position: fixed;
+      top: 0;
+      left: 0;
+      margin: var(--space-scaled);
+      color: var(--color-accent);
+      z-index: 1;
+    }
+    .progress-outer {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      margin: var(--space-scaled);
+      background: var(--color-dimmed);
+      width: 30rem;
+      .progress-inner {
+        width: 100%;
+        height: 1px;
+        background: var(--color-accent);
+        transform-origin: left center;
+        transform: scaleX(0);
+      }
+    }
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      .scroll {
+        .slider {
+          display: flex;
+          section {
+            min-width: 100vw;
+            height: calc(100vh - 10px);
+            padding: var(--space-scaled);
+            display: grid;
+            align-items: center;
+            align-content: center;
+            @media (min-width: 960px) {
+              grid-template-columns: 1fr 1fr;
+            }
+            p {
+              padding: var(--font-size-1) 0;
+              max-width: 60rem;
+            }
+            .mask {
+              width: 100%;
+              max-width: 60rem;
+              height: 100%;
+              max-height: 50vh;
+              clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+            }
+          }
+        }
+      }
+    }
+  }
+</style>

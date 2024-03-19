@@ -1,0 +1,113 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+// @ts-nocheck
+
+import { signal, list } from '../scripts/signal'
+
+customElements.define('signal-component', class extends HTMLElement {
+	constructor() {
+		super()
+
+		// button
+		const button = this.querySelector('button') as HTMLButtonElement
+
+		const count = signal(0)
+		const doubled = signal(count.get())
+
+		button.onclick = event => {
+			count.set(count.get() + 1)
+			doubled.set(count.get() * 2)
+			if (count.get() >= 10) {
+				unsubCount()
+				unsubDoubled()
+			}
+		}
+
+		const unsubCount = count.sub(() => button.innerText = count.get().toString())
+		const unsubDoubled = doubled.sub(() => console.log(doubled.get()))
+
+		// list
+		const arr = signal([1, 2, 3, 4, 5])
+
+		const ul = this.querySelector('ul') as HTMLUListElement
+		ul.innerHTML = list(arr.get(), 'li')
+		
+		ul.onclick = event => {
+			let currentArray = arr.get()
+			currentArray.splice(+event.target.dataset.key, 1, +event.target.innerText * count.get())
+			arr.set(currentArray)
+		}
+
+		arr.sub(() => ul.innerHTML = list(arr.get(), 'li'))
+
+		// input
+		const text = signal('')
+
+		const input = this.querySelector('input') as HTMLInputElement
+		const p = this.querySelector('p') as HTMLParagraphElement
+
+		input.oninput = event => text.set(event.target.value)
+
+		text.sub(() => p.innerText = text.get())
+	}
+})
+</script>
+
+<MainLayout>
+	<!-- <signal-component>
+		<button>0</button>
+		<ul></ul>
+		<input type="text" value="" placeholder="input text">
+		<p></p>
+	</signal-component> -->
+	<main>
+		<a data-astro-reload href="exp30"><h6>exp30</h6></a>
+		<a data-astro-reload href="exp29"><h6>exp29</h6></a>
+		<a data-astro-reload href="exp28"><h6>exp28</h6></a>
+		<a data-astro-reload href="exp27"><h6>exp27</h6></a>
+		<a data-astro-reload href="exp26"><h6>exp26</h6></a>
+		<a data-astro-reload href="exp25"><h6>exp25</h6></a>
+		<a data-astro-reload href="exp24"><h6>exp24</h6></a>
+		<a data-astro-reload href="exp23"><h6>exp23</h6></a>
+		<a data-astro-reload href="exp22"><h6>exp22</h6></a>
+		<a data-astro-reload href="exp21"><h6>exp21</h6></a>
+		<a data-astro-reload href="exp20"><h6>exp20</h6></a>
+		<a data-astro-reload href="exp19"><h6>exp19</h6></a>
+		<a data-astro-reload href="exp18"><h6>exp18</h6></a>
+		<a data-astro-reload href="exp17"><h6>exp17</h6></a>
+		<a data-astro-reload href="exp16"><h6>exp16</h6></a>
+		<a data-astro-reload href="exp15"><h6>exp15</h6></a>
+		<a data-astro-reload href="exp14"><h6>exp14</h6></a>
+		<a data-astro-reload href="exp13"><h6>exp13</h6></a>
+		<a data-astro-reload href="exp12"><h6>exp12</h6></a>
+		<a data-astro-reload href="exp11"><h6>exp11</h6></a>
+		<a data-astro-reload href="exp10"><h6>exp10</h6></a>
+		<a data-astro-reload href="exp09"><h6>exp09</h6></a>
+		<a data-astro-reload href="exp08"><h6>exp08</h6></a>
+		<a data-astro-reload href="exp07"><h6>exp07</h6></a>
+		<a data-astro-reload href="exp06"><h6>exp06</h6></a>
+		<a data-astro-reload href="exp05"><h6>exp05</h6></a>
+		<a data-astro-reload href="exp04"><h6>exp04</h6></a>
+		<a data-astro-reload href="exp03"><h6>exp03</h6></a>
+		<a data-astro-reload href="exp02"><h6>exp02</h6></a>
+		<a data-astro-reload href="exp01"><h6>exp01</h6></a>
+	</main>
+</MainLayout>
+
+<style>
+	main {
+		padding: var(--space-scaled);
+		a {
+			&:visited {
+				color: var(--color-dimmed);
+			}
+			h6 {
+				color: var(--color-text);
+				font-family: var(--font-family-monospace);
+			}
+		}
+	}
+</style>

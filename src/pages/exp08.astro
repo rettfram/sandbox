@@ -1,0 +1,115 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-08', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const middle = this.querySelector('.middle') as HTMLElement
+    const boxArr = [...this.querySelectorAll('.box')] as HTMLElement[]
+    const h1Arr = [...this.querySelectorAll('h1')] as HTMLElement[]
+    const h4Arr = [...this.querySelectorAll('h4')] as HTMLElement[]
+    const pArr = [...this.querySelectorAll('p')] as HTMLElement[]
+
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: middle,
+        start: '-20% 20%',
+        end: '100% 80%',
+        toggleActions: 'play reverse play reverse',
+      }
+    })
+
+    tl.from([h1Arr, h4Arr, pArr], {
+        yPercent: 200,
+        stagger: .1
+      })
+      .from(boxArr, {
+        ease: 'elastic.out(1, 0.5)',
+        duration: 2,
+        scaleY: 0,
+        stagger: .3,
+      }, '-=.3')
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-08>
+    <section></section>
+    <section class="middle">
+      <div class="card text">
+        <div class="mask"><h1>fylgja</h1></div>
+      </div>
+      <div class="card card1">
+        <div class="mask"><h4>þekkja</h4></div>
+        <div class="mask"><p>Vér lifum í heimi þessum, með örlögum ok orðstírum. Í geðræði ok galdri, skapum vér veröldina. Ásum ok vanum, goðum ok gýgjum, veitum virðingu. Yfir náttúrunni ríkir rúnar ok rjóða regin, þá er dagsbrún bregðr. </p></div>
+        <div class="box"></div>
+      </div>
+      <div class="card card2">
+        <div class="mask"><h4>þiggja</h4></div>
+        <div class="mask"><p>Hugr minn flýgr á fleygjandi hrafn, yfir fjöllum ok fjörum, fylgir mér á ferð. Þrumir þjóðir kveikja eld ok álfar ganga, glóa í grjóti. Hrímkaldur vindur hrýtr um haf, hviða hreggi, í hverju kvöldi.</p></div>
+        <div class="box"></div>
+      </div>
+    </section>
+    <section></section>
+  </exp-08>
+</MainLayout>
+
+<style>
+  exp-08 {
+    width: 100%;
+    height: 100vh;
+    section {
+      height: 100vh;
+      padding: var(--space-scaled);
+      &.middle {
+        display: grid;
+        @media (min-width: 960px) {
+          grid-template-columns: 1fr 1fr 1fr;
+          align-items: center;
+          .card {
+            width: 30rem;
+            text-align: center;
+            justify-self: center;
+            h4 {
+              padding-bottom: var(--space-scaled);
+              color: var(--color-accent);
+            }
+            .box {
+              width: 30rem;
+              height: 40rem;
+              background-color: var(--color-dimmed);
+              position: absolute;
+              top: calc(var(--font-size-3) * -1);
+              z-index: -1;
+            }
+          }
+          .card1 {
+            transform: translateY(-15rem);
+            text-align: right;
+            justify-self: end;
+            .box {
+              left: calc(var(--font-size-3) * -2);
+            }
+          }
+          .card2 {
+            transform: translateY(15rem);
+            text-align: left;
+            justify-self: start;
+            .box {
+              right: calc(var(--font-size-3) * -2);
+            }
+          }
+        }
+      }
+    }
+  }
+</style>

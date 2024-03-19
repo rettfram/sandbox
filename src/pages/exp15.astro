@@ -1,0 +1,120 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-15', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const slider = this.querySelector('.slider') as HTMLElement
+    const sectionArr = [...this.querySelectorAll('.slider section')] as HTMLElement[]
+    
+    const tl1 = gsap.timeline({
+      scrollTrigger: {
+        trigger: slider,
+        pin: true,
+        scrub: 2,
+        end: () => '+=' + slider.offsetWidth
+      },
+      defaults: {
+        ease: 'none'
+      }
+    })
+
+    tl1
+      .to(slider, {
+        x: -slider.offsetWidth + window.innerWidth
+      })
+
+    sectionArr.forEach(section => {
+      const img = section.querySelector('img') as HTMLElement
+      const h2 = section.querySelector('h2') as HTMLElement
+      const p = section.querySelector('p') as HTMLElement
+
+      const tl2 = gsap.timeline({
+        scrollTrigger: {
+          containerAnimation: tl1,
+          trigger: section,
+          scrub: 2,
+          start: '0% 75%',
+          end: '100% 100%'
+        }
+      })
+
+      tl2
+        .from(img, {
+          x: img.dataset.speed,
+        })
+        .from(h2, {
+          x: h2.dataset.speed,
+        }, '<')
+        .from(p, {
+          x: p.dataset.speed,
+        }, '<')
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-15>
+    <main>
+      <div class="scroll">
+        <div class="slider">
+          <section>
+              <img src="/images/img14.webp" alt="Abstract image" data-speed="100">
+              <h2 data-speed="-100">sifjar</h2>
+              <p data-speed="200">Úti á útströndum undir ýmislegum yfirburðum yfirborgir standa. Þar bráðnar bryggjan blámálmleg, blómstrandi undir brimbrún, brún sem bíður bræðra síð</p>
+          </section>
+          <section> 
+              <img src="/images/img15.webp" alt="Abstract image" data-speed="100">
+              <h2 data-speed="-100">ástir</h2>
+              <p data-speed="200">Í eyðimörkum eyðir enn þögnin, þögnin þenjist um þurru þyrni. Þar stendur steinn hátt í stað, staður stinnur undir stjörnum stinnum. Stjörnur strengja stíginn stjörnustíg, stíg sem stendur stjórnanda stjarnanna</p>
+          </section>
+          <section>
+              <img src="/images/img16.webp" alt="Abstract image" data-speed="100">
+              <h2 data-speed="-100">kærleikr</h2>
+              <p data-speed="200">Hjálmarr hrafnsvartur hrærir haf, haf sem hrinti heiman hirðkonungunum. Hafnarhjarta hlaðar höldum, höldum hjörtum hjörleikum. Hnúðu handar húkar hár, hár sem hvísla hjarðarflokki í híbýlinu.</p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </exp-15>
+</MainLayout>
+
+<style>
+  exp-15 {
+    display: grid;
+    main {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      .scroll {
+        .slider {
+          display: flex;
+          section {
+            min-width: 75vw;
+            height: calc(100vh - 10px);
+            display: grid;
+            align-items: center;
+            align-content: center;
+            place-content: center;
+            padding: var(--space-scaled);
+            img, h2, p {
+              max-width: 60rem;
+            }
+            h2 {
+              padding: var(--font-size-1) 0;
+            }
+          }
+        }
+      }
+    }
+  }
+</style>

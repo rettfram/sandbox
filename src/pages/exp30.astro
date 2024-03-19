@@ -1,0 +1,225 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import { loadFiles } from '../scripts/load-files'
+import { scrollEvent } from '../scripts/lenis'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import * as THREE from 'three'
+import { initThree } from '../scripts/init-three'
+
+
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js'
+import vignetteFragmentShader from '../shaders/vignette-fragment.glsl'
+import vignetteVertexShader from '../shaders/vignette-vertex.glsl'
+import glitchFragmentShader from '../shaders/glitch-fragment.glsl'
+import glitchVertexShader from '../shaders/glitch-vertex.glsl'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-30', class extends HTMLElement {
+  constructor() { super() }
+
+  async connectedCallback() {
+    const loaded = await loadFiles(['/images/img04.webp', '/images/img05.webp', '/images/img06.webp'])
+    if (loaded) this.querySelector('.loader-screen')!.classList.add('loader-hide')
+
+    const slider = this.querySelector('.slider') as HTMLElement
+    const imgArr = [...this.querySelectorAll('img')] as HTMLImageElement[]
+
+    const webgl = this.querySelector('.webgl') as HTMLElement
+    const { renderer, scene, camera, raycaster, mouse, effectComposer, resize, scroll, mousemove } = initThree(webgl)
+
+    const createMeshFromImg = img => {
+      const { width, height } = img.getBoundingClientRect()
+      const hover = new THREE.Vector2(0.5, 0.5)
+      const texture = new THREE.TextureLoader().load(img.src, () => texture.needsUpdate = true)
+      const shaderMaterial = new THREE.ShaderMaterial({
+        fragmentShader: glitchFragmentShader, 
+        vertexShader: glitchVertexShader,
+        uniforms: {
+          uTexture: { value: texture },
+          uTime: { value: 0 },
+          uHoverState: { value: 0 },
+          uHover: { value: hover }
+        },
+        side: THREE.DoubleSide,
+        // wireframe: true
+      }) 
+      const geometry = new THREE.PlaneGeometry(width, height, 10, 10)
+      const material = shaderMaterial.clone()
+      const mesh = new THREE.Mesh(geometry, material)
+      mesh.userData.html = img
+      return mesh
+    }
+
+    if (imgArr.length) imgArr.map(img => {
+      const mesh = createMeshFromImg(img)
+      scene.add(mesh)
+    })
+
+    const shaderPass = new ShaderPass({
+      vertexShader: vignetteVertexShader,
+      fragmentShader: vignetteFragmentShader,
+      uniforms: {
+        tDiffuse: { value: null },
+        uIntensity: { value: 1 },
+        uScrollSpeed: { value: 0 }
+      }
+    })
+    effectComposer.addPass(shaderPass)
+
+    renderer.setAnimationLoop(time => {
+      shaderPass.uniforms.uScrollSpeed.value = Math.abs(scrollEvent.velocity) || 0
+      effectComposer.render()
+    })
+
+    gsap.to(slider, {
+      x: -slider.offsetWidth + innerWidth,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: slider,
+        pin: true,
+        scrub: 1,
+        end: () => '+=' + slider.offsetWidth
+      }
+    })
+
+    window.onmousemove = event => mousemove(event)
+    window.onscroll = event => resize()
+    window.onresize = event => resize()
+    window.onload = event => resize()
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-30>
+    <div class="scroll-outer">
+      <div class="scroll-inner">
+        <div class="slider">
+          <section>
+            <figure>
+              <img src="/images/img04.webp" alt="Abstract image">
+              <figcaption>
+                <h4>áhyggja</h4>
+              </figcaption>
+            </figure>
+          </section>
+          <section>
+            <figure>
+              <img src="/images/img05.webp" alt="Abstract image">
+              <figcaption>
+                <h4>hugsjúkr</h4>
+              </figcaption>
+            </figure>
+          </section>
+          <section>
+            <figure>
+              <img src="/images/img06.webp" alt="Abstract image">
+              <figcaption>
+                <h4>annt</h4>
+              </figcaption>
+            </figure>
+          </section>
+          <section>
+            <figure>
+              <img src="/images/img07.webp" alt="Abstract image">
+              <figcaption>
+                <h4>hvatvetna</h4>
+              </figcaption>
+            </figure>
+          </section>
+          <section>
+            <figure>
+              <img src="/images/img08.webp" alt="Abstract image">
+              <figcaption>
+                <h4>sýnum</h4>
+              </figcaption>
+            </figure>
+          </section>
+          <section>
+            <figure>
+              <img src="/images/img09.webp" alt="Abstract image">
+              <figcaption>
+                <h4>droyma</h4>
+              </figcaption>
+            </figure>
+          </section>
+          <section>
+            <figure>
+              <img src="/images/img10.webp" alt="Abstract image">
+              <figcaption>
+                <h4>alit</h4>
+              </figcaption>
+            </figure>
+          </section>
+        </div>
+      </div>
+    </div>
+
+    <section class="webgl"></section>
+    <section class="loader-screen">Loading...</section>
+  </exp-30>
+</MainLayout>
+
+<style>
+  exp-30 {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    .scroll-outer {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      .scroll-inner {
+        .slider {
+          display: flex;
+          section {
+            min-width: 60vw;
+            height: calc(100vh - 10px);
+            display: grid;
+            place-content: center;
+            padding: var(--space-scaled);
+            figure {
+              width: 40vw;
+              height: 40vh;
+              img {
+                width: 100%;
+                opacity: 0;
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .webgl {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    
+    .loader-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--color-background);
+      display: grid;
+      place-content: center;
+      transition: 1s transform easy-out;
+      z-index: 100;
+    }
+    .loader-hide {
+      transform: translateY(-100%);
+    }
+  }
+</style>

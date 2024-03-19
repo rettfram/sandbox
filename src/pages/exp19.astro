@@ -1,0 +1,84 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-19', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const imgArr = [...this.querySelectorAll('img')] as HTMLElement[]
+
+    imgArr.forEach(img => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: img,
+          start: '-100% 0%',
+          end: '100% -100%',
+          scrub: 1,
+        }
+      })
+
+      tl
+      .to(img, {
+        clipPath: `polygon(0% 25%, 100% 25%, 100% 100%, 0% 100%)`,
+      })
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-19>
+    <section>
+      <img src="/images/img11.webp" alt="Abstract image">
+      <img src="/images/img12.webp" alt="Abstract image">
+      <h4>lið</h4>
+      <h4>efla</h4>
+      <img src="/images/img13.webp" alt="Abstract image">
+      <img src="/images/img14.webp" alt="Abstract image">
+      <img src="/images/img15.webp" alt="Abstract image">
+      <h4>ǫlðr</h4>
+      <img src="/images/img16.webp" alt="Abstract image">
+      <img src="/images/img17.webp" alt="Abstract image">
+      <img src="/images/img18.webp" alt="Abstract image">
+      <h4>allr</h4>
+      <h4>hylli</h4>
+      <img src="/images/img19.webp" alt="Abstract image">
+      <img src="/images/img20.webp" alt="Abstract image">
+    </section>
+  </exp-19>
+</MainLayout>
+
+<style>
+  exp-19 {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    section {
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: var(--space-scaled);
+      gap: var(--space-scaled);
+      will-change: transform;
+      @media (min-width: 960px) { grid-template-columns: 1fr 1fr 1fr; }
+      img {
+        width: 100%;
+        height: auto;
+        clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 0% 75%);
+      }
+      h4 {
+        display: none;
+        align-content: center;
+        transform: translateY(-10%);
+        @media (min-width: 960px) { display: grid; }
+      }
+    }
+  }
+</style>

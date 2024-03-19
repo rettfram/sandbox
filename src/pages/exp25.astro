@@ -1,0 +1,62 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+customElements.define('exp-25', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const div = this.querySelector('div') as HTMLElement
+    const button = this.querySelector('button') as HTMLElement
+    const h2 = this.querySelector('h2') as HTMLElement
+    let x = 0, y = 0
+
+    div.onmousemove = event => {
+      let { left, top, width, height } = div.getBoundingClientRect()
+      x = event.clientX - left - width / 2
+      y = event.clientY - top - height / 2
+      button.style.transform = `translate(${x*0.5}px, ${y*0.5}px)`
+      h2.style.transform = `translate(${x*0.1}px, ${y*0.1}px)`
+    }
+
+    div.onmouseout = event => {
+      button.style.transform = `translate(0, 0)`
+      h2.style.transform = `translate(0, 0)`
+    }
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-25>
+    <div>
+      <button>
+        <h2>bregða</h2>
+      </button>
+    </div>
+  </exp-25>
+</MainLayout>
+
+<style>
+  exp-25 {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    div {
+      padding: var(--font-size-3);
+      button {
+        border: 1px solid var(--color-dimmed);
+        padding: var(--font-size-3);
+        border-radius: 100vmin;
+        will-change: transform; 
+        transition: .5s transform ease-out; 
+        h2 {
+          will-change: transform; 
+          transition: .5s transform ease-out; 
+        }
+      }
+    }
+  }
+</style>

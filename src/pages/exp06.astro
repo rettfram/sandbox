@@ -1,0 +1,85 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+
+customElements.define('exp-06', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const aside = this.querySelector('aside') as HTMLElement
+    const main = this.querySelector('main') as HTMLElement
+    const menuToggle = this.querySelector('.menu-toggle') as HTMLElement
+
+    let menuStatus = false
+
+    const tl = gsap.timeline({
+      defaults: {
+        ease: 'power4.inOut',
+        duration: .3,
+      }
+    })
+
+    tl.to([main, aside], {
+      stagger: .2,
+      x: 0,
+    }).paused(true)
+
+    menuToggle.onclick = () => {
+      if (!menuStatus) {
+        tl.play()
+        menuStatus = true
+      } else {
+        tl.reverse()
+        menuStatus = false
+      }
+    }
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-06>
+    <aside>
+      <nav>
+        <ul>
+          <li>
+            <a href="#">bygð</a>
+            <a href="#">staðr</a>
+            <a href="#">sjǫt</a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+    <main>
+      <a class="menu-toggle">
+        <h3>mænur.</h3>
+      </a>
+    </main>
+  </exp-06>
+</MainLayout>
+
+<style>
+  exp-06 {
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    aside {
+      min-width: 30rem;
+      text-align: center;
+      padding: var(--space-scaled);
+      background: var(--color-dimmed);
+      transform: translateX(-100%);
+    }
+    main {
+      padding: var(--space-scaled);
+      transform: translateX(-100%);
+    }
+  }
+  a, h3 {
+    color: var(--color-text);
+    display: block;
+  }
+</style>

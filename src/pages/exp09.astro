@@ -1,0 +1,126 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-09', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const middle = this.querySelector('.middle') as HTMLElement
+    const h1 = this.querySelector('h1') as HTMLElement
+    const p = this.querySelector('p') as HTMLElement
+    const span = this.querySelector('span') as HTMLElement
+    const line = this.querySelector('.line') as HTMLElement
+
+    const tl1 = gsap.timeline({
+      scrollTrigger: {
+        trigger: middle,
+        start: '0 20%',
+        end: '100% 50%',
+        toggleActions: 'play reverse restart reverse'
+      },
+      defaults: {
+        ease: 'expo.out',
+        duration: 1
+      }
+    })
+    
+    const tl2 = gsap.timeline({
+      scrollTrigger: {
+        trigger: middle,
+        start: '0 30%',
+        end: '40% 0',
+        toggleActions: 'play reverse restart reverse',
+        scrub: 2
+      },
+    })
+
+    tl1
+      .from([h1, p], {
+        duration: 2,
+        yPercent: 100,
+        stagger: .2,
+        opacity: 0
+      })
+
+    tl2
+      .from(line, {
+        scaleY: 0
+      })
+      .from(span, {
+        xPercent: -100,
+        yPercent: 0
+      }, '<')
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-09>
+    <section></section>
+    <section class="middle">
+      <aside>
+        <div class="mask">
+          <h1>fremja</h1>
+        </div>
+      </aside>
+      <main>
+        <div class="mask">
+          <p>Sálmurinn hljómar hár í hafi, hryllingurinn hljómar hát í hafi.<br>Meðan álfa ljóð í ljóma leita, lifa lífsins ljóð í ljósi.</p>
+        </div>
+      </main>
+      <div class="line"></div>
+      <span>fremja</span>
+    </section>
+    <section></section>
+  </exp-09>
+</MainLayout>
+
+<style>
+  exp-09 {
+    width: 100%;
+    min-height: 100vh;
+    section {
+      height: 100vh;
+      padding: var(--space-scaled);
+      &.middle {
+        display: flex;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        aside {
+          flex: .6;
+          margin: var(--space-scaled);
+          text-align: right;
+        }
+        main {
+          flex: 1;
+          margin: var(--space-scaled);
+        }
+        .line {
+          position: absolute;
+          top: 0;
+          left: 39%;
+          height: 100%;
+          width: 1px;
+          background: var(--color-text);
+        }
+        span {
+          position: absolute;
+          top: 20%;
+          left: 100%;
+          font-size: calc(var(--font-size-3) * 10);
+          opacity: 0.05;
+          font-weight: var(--font-bold);
+          z-index: -1;
+        }
+      }
+    }
+  }
+</style>

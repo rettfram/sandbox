@@ -1,0 +1,150 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import { loadFiles } from '../scripts/load-files'
+import { gsap } from '../scripts/gsap'
+import * as THREE from 'three'
+import { initThree } from '../scripts/init-three'
+
+customElements.define('exp-21', class extends HTMLElement {
+  constructor() { super() }
+
+  async connectedCallback() {
+    const loaded = await loadFiles(['/models/model.glb'])
+    if (loaded) this.querySelector('.loader-screen').classList.add('loader-hide')
+
+    const webgl = this.querySelector('.webgl') as HTMLElement
+    const loadingScreen = this.querySelector('.loader-screen') as HTMLElement
+    const animate = this.querySelector('.animate') as HTMLElement
+
+    const { renderer, scene, camera, raycaster, mouse, gltfloader, resize } = initThree(webgl)
+
+    let model
+    gltfloader.load('/models/model.gltf', gltf => {
+      model = gltf.scene
+
+      model.position.x = camera.position.x - 6
+      model.position.z = camera.position.z - 6
+      model.rotation.y = 1
+      scene.add(gltf.scene)
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: animate,
+          start: '0% 100%',
+          end: '100%, 50%',
+          scrub: true,
+        }
+      })
+
+      tl
+      .to(model.position, {
+        x: camera.position.x + 6
+      })
+      .to(model.rotation, {
+        y: -1.5
+      }, '<')
+      .to(model.scale, {
+        x: 2,
+        y: 2,
+        z: 2,
+      }, '<')
+
+      // const folder = gui.addFolder('gltf')
+      // folder.add(model.position, 'x').min(-10).max(10).step(0.01).name('Position X')
+      // folder.add(model.position, 'y').min(-10).max(10).step(0.01).name('Position Y')
+      // folder.add(model.position, 'z').min(-10).max(10).step(0.01).name('Position Z')
+      // folder.add(model.rotation, 'x').min(-10).max(10).step(0.01).name('Rotation X')
+      // folder.add(model.rotation, 'y').min(-10).max(10).step(0.01).name('Rotation Y')
+      // folder.add(model.rotation, 'z').min(-10).max(10).step(0.01).name('Rotation Z')
+    })
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+    scene.add(ambientLight)
+
+    const pointLight = new THREE.PointLight(0xffffff, 100)
+    pointLight.position.set(camera.position.x, camera.position.y, camera.position.z)
+    scene.add(pointLight)
+
+    const wave = (model, baseY = 0, amplitude = 0.1, frequency = 2) => {
+      // current time in seconds
+      const time = performance.now() * 0.001
+      model.position.y = baseY + Math.sin(time * frequency) * amplitude
+    }
+
+    // animation
+    renderer.setAnimationLoop(time => {
+      if (model) wave(model)
+      renderer.render(scene, camera)
+    })
+
+    window.onload = () => resize()
+    window.onresize = () => resize()
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-21>
+    <section>
+      <h1>aldr</h1>
+    </section>
+    <section class="animate">
+      <h1>ævi</h1>
+    </section>
+
+    <section class="webgl"></section>
+    <section class="loader-screen">Loading...</section>
+  </exp-21>
+</MainLayout>
+
+<style>
+  exp-21 {
+    width: 100%;
+    min-height: 100%;
+    display: grid;
+    div {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    section {
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      place-content: center;
+      h1 {
+        color: var(--color-dimmed);
+      }
+    }
+
+    .webgl {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: -1;
+    }
+
+    .loader-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--color-background);
+      display: grid;
+      place-content: center;
+      transition: 1s transform easy-out;
+      z-index: 100;
+    }
+    .loader-hide {
+      transform: translateY(-100%);
+    }
+  }
+</style>

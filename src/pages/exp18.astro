@@ -1,0 +1,107 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { Flip } from 'gsap/Flip'
+
+gsap.registerPlugin(Flip)
+
+customElements.define('exp-18', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const button = this.querySelector('button') as HTMLElement
+    const section = this.querySelector('section') as HTMLElement
+    const divArr = [...this.querySelectorAll('div')] as HTMLElement[]
+    
+    let column  = false
+    
+    button.onclick = () => {
+      const state = Flip.getState(divArr)
+
+      section.classList.toggle('column')
+
+      if (column) {
+        button.innerHTML = '<h5>row</h5>'
+        column = !column
+      } else {
+        button.innerHTML = '<h5>column</h5>'
+        column = !column
+      }
+
+      Flip.from(state, {
+        duration: 1,
+        ease: 'ease.inOut'
+      })
+    }
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-18>
+    <button><h5>row</h5></button>
+    <section>
+      <div>
+        <img src="/images/img01.webp" alt="Abstract image">
+        <p>eptir</p>
+      </div>
+      <div>
+        <img src="/images/img02.webp" alt="Abstract image">
+        <p>síðan</p>
+      </div>
+      <div>
+        <img src="/images/img03.webp" alt="Abstract image">
+        <p>eykt</p>
+      </div>
+      <div>
+        <img src="/images/img04.webp" alt="Abstract image">
+        <p>optar</p>
+      </div>
+      <div>
+        <img src="/images/img05.webp" alt="Abstract image">
+        <p>endr</p>
+      </div>
+    </section>
+  </exp-18>
+</MainLayout>
+
+<style>
+  exp-18 {
+    width: 100%;
+    min-height: 100vh;
+    button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      padding: var(--space-scaled);
+      color: var(--color-accent);
+    }
+    section {
+      margin: calc(var(--space-scaled) * 3) var(--space-scaled);
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: var(--font-size-3);
+      &.column {
+        grid-template-columns: 1fr 1fr 1fr;
+      }
+      div {
+        background: var(--color-dimmed);
+        padding: var(--font-size-1);
+        display: flex;
+        align-items: center;
+        gap: var(--font-size-1);
+        img {
+          width: 30rem;
+          height: 20rem;
+          object-fit: cover;
+        }
+        p {
+          padding: var(--font-size-1);
+        }
+      }
+    }
+  }
+</style>

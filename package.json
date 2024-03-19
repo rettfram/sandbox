@@ -1,0 +1,27 @@
+{
+  "name": "rettfram",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@fontsource-variable/inconsolata": "^5.0.16",
+    "@fontsource-variable/montserrat": "^5.0.17",
+    "@studio-freight/lenis": "^1.0.34",
+    "astro": "^4.2.4",
+    "autoprefixer": "^10.4.17",
+    "dat.gui": "^0.7.9",
+    "gsap": "^3.12.5",
+    "postcss-easings": "^4.0.0",
+    "postcss-preset-env": "^9.3.0",
+    "three": "^0.161.0"
+  },
+  "devDependencies": {
+    "vite-plugin-glsl": "^1.2.1"
+  }
+}

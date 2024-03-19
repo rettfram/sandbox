@@ -1,0 +1,250 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import { loadFiles } from '../scripts/load-files'
+import { scrollEvent } from '../scripts/lenis'
+import { gsap } from '../scripts/gsap'
+import * as THREE from 'three'
+import { initThree } from '../scripts/init-three'
+
+import glitchFragmentShader from '../shaders/glitch-fragment.glsl'
+import glitchVertexShader from '../shaders/glitch-vertex.glsl'
+import gridFragmentShader from '../shaders/grid-fragment.glsl'
+import gridVertexShader from '../shaders/grid-vertex.glsl'
+import slabFragmentShader from '../shaders/slab-fragment.glsl'
+import slabVertexShader from '../shaders/slab-vertex.glsl'
+
+customElements.define('exp-29', class extends HTMLElement {
+  constructor() { super() }
+  
+  async connectedCallback() {
+    const loaded = await loadFiles(['/images/img01.webp', '/images/img02.webp', '/images/img03.webp', '/images/img14.webp', '/images/img15.webp', '/images/img16.webp', '/images/img17.webp', '/images/img18.webp', '/images/img19.webp', '/images/img20.webp'])
+    if (loaded) this.querySelector('.loader-screen').classList.add('loader-hide')
+
+    const img01 = this.querySelector('.img01') as HTMLImageElement
+    const img02 = this.querySelector('.img02') as HTMLImageElement
+    const img03 = this.querySelector('.img03') as HTMLImageElement
+    
+    const webgl = this.querySelector('.webgl') as HTMLElement
+    const { renderer, scene, camera, raycaster, mouse, gltfloader, resize, scroll, mousemove  } = initThree(webgl)
+
+
+
+    // Glitch shader
+    const createMeshFromImg01 = img => {
+      const { width, height } = img.getBoundingClientRect()
+      const hover = new THREE.Vector2(0.5, 0.5)
+      const texture = new THREE.TextureLoader().load(img.src, () => texture.needsUpdate = true)
+      const shaderMaterial = new THREE.ShaderMaterial({
+        fragmentShader: glitchFragmentShader, 
+        vertexShader: glitchVertexShader,
+        uniforms: {
+          uTexture: { value: texture },
+          uTime: { value: 0 },
+          uHover: { value: hover },
+          uIntensity: { value: 0 }
+        },
+        side: THREE.DoubleSide,
+        // wireframe: true
+      }) 
+      const geometry = new THREE.PlaneGeometry(width, height, 10, 10)
+      const material = shaderMaterial.clone()
+      const mesh = new THREE.Mesh(geometry, material)
+      mesh.userData.html = img
+      return mesh
+    }
+
+    const mesh01 = createMeshFromImg01(img01)
+    scene.add(mesh01)
+
+    img01.onmouseenter = event => {
+      gsap.to(mesh01.material.uniforms.uIntensity, {
+        duration: 1,
+        value: 1
+      })
+    }
+    img01.onmouseout = event => {
+      gsap.to(mesh01.material.uniforms.uIntensity, {
+        duration: 1,
+        value: 0
+      })
+    }
+
+
+
+    //  Grid shader
+    const createMeshFromImg02 = img => {
+      const { width, height } = img.getBoundingClientRect()
+      const hover = new THREE.Vector2(0.5, 0.5)
+      const mouse = new THREE.Vector2(0.5, 0.5)
+      const prevMouse = new THREE.Vector2(0.5, 0.5)
+      const texture = new THREE.TextureLoader().load(img.src, () => texture.needsUpdate = true)
+      const shaderMaterial = new THREE.ShaderMaterial({
+        fragmentShader: gridFragmentShader, 
+        vertexShader: gridVertexShader,
+        uniforms: {
+          uTexture: { value: texture },
+          uTime: { value: 0 },
+          uHover: { value: hover },
+          uIntensity: { value: 0 }
+        },
+        side: THREE.DoubleSide,
+        // wireframe: true
+      }) 
+      const geometry = new THREE.PlaneGeometry(width, height, 10, 10)
+      const material = shaderMaterial.clone()
+      const mesh = new THREE.Mesh(geometry, material)
+      mesh.userData.html = img
+      return mesh
+    }
+
+    const mesh02 = createMeshFromImg02(img02)
+    scene.add(mesh02)
+
+    img02.onmousemove = event => {
+      gsap.to(mesh02.material.uniforms.uIntensity, {
+        duration: 1,
+        value: event.movementX
+      })
+      gsap.to(mesh02.material.uniforms.uIntensity, {
+        duration: 1,
+        value: 0
+      })
+    }
+
+
+    
+    // Slab shader
+    const createMeshFromImg03 = img => {
+      const { width, height } = img.getBoundingClientRect()
+      const hover = new THREE.Vector2(0.5, 0.5)
+      const texture = new THREE.TextureLoader().load(img.src, () => texture.needsUpdate = true)
+      const shaderMaterial = new THREE.ShaderMaterial({
+        fragmentShader: slabFragmentShader, 
+        vertexShader: slabVertexShader,
+        uniforms: {
+          uTexture: { value: texture },
+          uTime: { value: 0 },
+          uHover: { value: hover },
+          uIntensity: { value: 0 }
+        },
+        side: THREE.DoubleSide,
+        // wireframe: true
+      }) 
+      const geometry = new THREE.PlaneGeometry(width, height, 10, 10)
+      const material = shaderMaterial.clone()
+      const mesh = new THREE.Mesh(geometry, material)
+      mesh.userData.html = img
+      return mesh
+    }
+
+    const mesh03 = createMeshFromImg03(img03)
+    scene.add(mesh03)
+
+    img03.onmouseenter = event => {
+      gsap.to(mesh03.material.uniforms.uIntensity, {
+        duration: 1,
+        value: 1
+      })
+    }
+    img03.onmouseout = event => {
+      gsap.to(mesh03.material.uniforms.uIntensity, {
+        duration: 1,
+        value: 0
+      })
+    }
+
+
+
+    renderer.setAnimationLoop(time => {
+      raycaster.setFromCamera(mouse, camera)
+      const intersects = raycaster.intersectObjects(scene.children)
+
+      if (intersects.length) intersects[0].object.material.uniforms.uHover.value = intersects[0].uv
+
+      if (scene.children) scene.children.forEach(object => {
+        if (object.material) object.material.uniforms.uTime.value = time*0.001
+      })
+
+      renderer.render(scene, camera)
+    })
+    
+    window.onmousemove = event => mousemove(event)
+    window.onscroll = event => scroll(scrollEvent)
+    window.onresize = event => resize()
+    window.onload = event => resize()
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-29>
+    <div class="content">
+      <div>
+        <img class="img01" src="/images/img01.webp" alt="Abstract image">
+        <h6>stokkr</h6>
+      </div>
+      <div>
+        <img class="img02" src="/images/img02.webp" alt="Abstract image">
+        <h6>geirr</h6>
+      </div>
+      <div>
+        <img class="img03" src="/images/img03.webp" alt="Abstract image">
+        <h6>steði</h6>
+      </div>
+    </div>
+
+    <section class="webgl"></section>
+    <section class="loader-screen">Loading...</section>
+  </exp-29>
+</MainLayout>
+
+<style>
+  exp-29 {
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    .content {
+      display: grid;
+      place-content: center;
+      grid-template-columns: 1fr;
+      @media (min-width: 960px) {
+        grid-template-columns: 1fr 1fr 1fr; 
+      }
+      padding: calc(var(--space-scaled) * 3);
+      gap: calc(var(--font-size-3) * 3);
+      div {
+        img {
+          width: 100%;
+          opacity: 0;
+        }
+      }
+    }
+    .webgl {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    
+    .loader-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--color-background);
+      display: grid;
+      place-content: center;
+      transition: 1s transform easy-out;
+      z-index: 100;
+    }
+    .loader-hide {
+      transform: translateY(-100%);
+    }
+  }
+</style>

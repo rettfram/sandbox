@@ -1,0 +1,491 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import { loadFiles } from '../scripts/load-files'
+import { gsap } from '../scripts/gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import * as THREE from 'three'
+import { initThree } from '../scripts/init-three'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-23', class extends HTMLElement {
+  constructor() { super() }
+
+  async connectedCallback() {
+    const loaded = await loadFiles(['/images/img11.webp', '/images/img12.webp', '/images/img13.webp', '/images/img14.webp', '/images/img15.webp', '/images/img16.webp', '/images/img17.webp', '/images/img18.webp', '/images/img19.webp', '/images/img20.webp'])
+    if (loaded) this.querySelector('.loader-screen').classList.add('loader-hide')
+    
+    const webgl = this.querySelector('.webgl') as HTMLElement
+    const loadingScreen = this.querySelector('.loader-screen') as HTMLElement
+    const details = this.querySelector('.details') as HTMLElement
+    const textElement = this.querySelector('header span') as HTMLElement
+    const inspection = this.querySelector('.inspection') as HTMLElement
+    const marquee = this.querySelector('.marquee h3') as HTMLElement
+    const slider = this.querySelector('.slider') as HTMLElement
+    const slideArr = [...this.querySelectorAll('.slide')] as HTMLElement[]
+    const contact = this.querySelector('.contact') as HTMLElement
+
+    const { renderer, scene, camera, raycaster, mouse, gltfloader, resize } = initThree(webgl)
+
+    const animateHeaderText = () => {
+      const words = ['staþgi', 'sætt', 'ráð']
+      let currentIndex = 0
+
+      const updateText = () => {
+        textElement.textContent = words[currentIndex]
+        textElement.innerHTML = textElement.innerText
+          .split('')
+          .map(char => char.match(/\s/) === null ? `<span style="display: inline-block">${char}</span>` : char)
+          .join('')
+
+        gsap
+        .from(textElement.children, {
+          ease: 'expo.out',
+          duration: 1.5,
+          stagger: .03,
+          yPercent: 100,
+        })
+        currentIndex = (currentIndex + 1) % words.length
+      }
+      setInterval(updateText, 3000)
+    }
+
+    const animateInspectionSetion = () => {
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: inspection,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        }
+      })
+
+      tl
+      .to(inspection.children[0], {
+        y: -100
+      })
+      .to(inspection.children[1], {
+        y: -50,
+        height: 150
+      }, '<')
+
+      gsap.to(marquee, {
+        scrollTrigger: {
+          trigger: marquee,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true
+        },
+        x: 100
+      })
+    }
+
+    const animateSliderSection = () => {
+      const mm = gsap.matchMedia()
+
+      mm.add('(min-width: 960px)', () => {
+        const tl = gsap.timeline({
+          defaults: {
+            ease: 'none'
+          },
+          scrollTrigger: {
+            trigger: slider,
+            pin: true,
+            scrub: 1,
+            end: () => "+=" + slider.offsetWidth
+          }
+        })
+
+        tl
+        .to(slider, {
+          x: -slider.offsetWidth + innerWidth
+        })
+
+        slideArr.forEach((slide, index) => {
+          slide.firstElementChild.innerHTML = slide.innerText
+            .split('')
+            .map(char => char.match(/\s/) === null ? `<span style="display: inline-block">${char}</span>` : char)
+            .join('')
+
+          tl.from(slide.firstElementChild.children, {
+            scrollTrigger: {
+              trigger: slide.firstElementChild.children,
+              start: 'top bottom',
+              end: 'bottom center',
+              containerAnimation: tl,
+              scrub: true
+            },
+            stagger: 0.03,
+            opacity: 0,
+            y: 10,
+          })
+        })
+      })
+    }
+
+    const animateContactSection = () => {
+      gsap.set([contact.querySelector('h4'), contact.querySelector('span')], {
+        yPercent: 100
+      })
+      gsap.set(contact.querySelector('p'), {
+        opacity: 0
+      })
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: contact,
+          start: '50% 100%',
+          end: '100% 100%',
+          scrub: true
+        }
+      })
+
+      tl
+      .to([contact.querySelector('.line-top'), contact.querySelector('.line-bottom')], {
+        width: '100%'
+      })
+      .to([contact.querySelector('h4'), contact.querySelector('span')], {
+        yPercent: 0
+      })
+      .to(contact.querySelector('p'), {
+        opacity: 1
+      })
+    }
+
+    const animateModel = () => {
+      let model
+      gltfloader.load('/models/ring.glb', gltf => {
+        model = gltf.scene
+        model.position.z = camera.position.z - 3
+        scene.add(model)
+
+        const tlDetails = gsap.timeline({
+          scrollTrigger: {
+            trigger: details,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true
+          },
+          defaults: {
+            duration: 3
+          }
+        })
+
+        tlDetails
+        .to(model.position, {
+          z: camera.position.z + 5,
+        })
+        .to(model.rotation, {
+          z: 0,
+        }, '<')
+
+        const toggleWireframe = (model, isWireframe, opacity) => {
+          model.traverse(model => {
+            if (model.isMesh && model.material) {
+              model.material.wireframe = isWireframe
+              model.material.opacity = opacity
+              model.material.transparent = true
+            }
+          })
+        }
+
+        const tlContact = gsap.timeline({
+          scrollTrigger: {
+            trigger: contact,
+            start: '0% 80%',
+            end: '100% 50%',
+            scrub: true,
+            // toggleActions: 'play none none reverse'
+            onEnter: () => toggleWireframe(model, true, 0.1),
+            onEnterBack: () => toggleWireframe(model, true, 0.1),
+            onLeaveBack: () => toggleWireframe(model, false, 1),
+            onLeave: () => toggleWireframe(model, false, 1)
+          }
+        })
+
+        tlContact.to(model.position, {
+          z: camera.position.z - 4
+        })
+      })
+
+      const ambientLight = new THREE.AmbientLight(0xffffff, 1)
+      scene.add(ambientLight)
+
+      const pointLight = new THREE.PointLight(0xffffff, 3000)
+      pointLight.position.set(camera.position.x + 10, camera.position.y + 20, camera.position.z)
+      scene.add(pointLight)
+
+      renderer.setAnimationLoop(time => {
+        if (model) model.rotation.y += Math.PI / 600
+        renderer.render(scene, camera)
+      })
+    }
+
+    animateHeaderText()
+    animateInspectionSetion()
+    animateSliderSection()
+    animateContactSection()
+    animateModel()
+
+    window.onload = () => resize()
+    window.onresize = () => resize()
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-23> 
+    <nav>
+      <a href="#">nauðigr</a>
+      <a href="#"><span>rangsœlis</span></a>
+    </nav>
+
+    <header>
+      <div class="left">
+        <h1>
+          <div class="mask">
+            <span>staþgi</span>
+          </div>
+          <div class="mask">
+            <span>framar</span>
+          </div>
+        </h1>
+      </div>
+      <div class="right">
+        <img src="/images/img06.webp" alt="Abstract image">
+      </div>
+    </header>
+
+    <section class="details">
+      <div class="inspection">
+        <h2>06</h2>
+        <img src="/images/img07.webp" alt="Abstract image">
+        <p>Undir útströndum úlfar hlaupa, úrskurðar nornir nái nýja dögun. Úlfar ulpa undir tungli, undir stjörnum standa stórvirðir fyrirfram.</p>
+      </div>
+      <div class="mask marquee">
+        <h3>helzti</h3>
+      </div>
+    </section>
+
+    <section class="about">
+      <div class="scroll">
+        <div class="slider">
+          <div class="slide">
+            <p>Vinir vopna vaka við vegskil, vegskil sem vöktar voru vandar vitar</p>
+          </div>
+          <div class="slide">
+            <p>Vígvellir vaxa undir vápnum, vápn sem víðum vegum veita</p>
+          </div>
+          <div class="slide">
+            <p>Vetrarköld vekja vindana, vindar sem vaka við vetrardaga vannflóða</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="contact">
+      <div class="line-top"></div>
+      <div class="mask">
+        <h4>alföðr</h4>
+      </div>
+      <a href="#" class="cta">
+        <div class="mask">
+          <span>almáttigr</span>
+        </div>
+      </a>
+      <p>Undir útströndum úlfar hlaupa, úrskurðar nornir nái nýja dögun</p>
+      <div class="line-bottom"></div>
+    </section>
+
+    <footer></footer>
+    
+    <section class="webgl"></section>
+    <section class="loader-screen">Loading...</section>
+  </exp-23>
+</MainLayout>
+
+<style>
+  exp-23 {
+    width: 100%;
+    min-height: 100%;
+    display: grid;
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      min-height: 10vh;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: var(--space-scaled);
+      z-index: 10;
+      mix-blend-mode: difference;
+      a {
+        font-weight: var(--font-bold);
+        color: var(--color-text);
+      }
+    }
+
+    header {
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      grid-template-columns: 3fr 1fr;
+      .left {
+        padding: var(--space-scaled);
+        display: grid;
+        align-content: center;
+        h1 {
+          font-size: calc(var(--font-size-3) * 2);
+        }
+      }
+      .right {
+        img {
+          width: 100%;
+          height: 100vh;
+          object-fit: cover;
+        }
+      }
+    }
+
+    .details {
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      place-content: center;
+      position: relative;
+      .inspection {
+        display: grid;
+        place-content: center;
+        grid-template-columns: 1fr 2fr 3fr;
+        gap: var(--font-size-1);
+        padding: var(--space-scaled);
+        max-width: 100rem;
+        min-height: 10rem;
+        h2 {
+          color: var(--color-accent);
+        }
+        img {
+          object-fit: cover;
+          width: 100%;
+          height: 0;
+        }
+      }
+      .marquee {
+        h3 {
+          position: absolute;
+          bottom: 0;
+          font-size: calc(var(--font-size-3) * 3);
+          opacity: .1;
+        }
+      }
+    }
+
+    .about {
+      display: block;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+      @media (min-width: 960px) {
+        display: flex;
+      }
+      .scroll {
+        .slider {
+          display: block;
+          @media (min-width: 960px) {
+            display: flex;
+          }
+          .slide {
+            width: 100%;
+            min-height: 50vh;
+            padding: var(--space-scaled);
+            display: grid;
+            place-content: center;
+            padding: var(--space-scaled);
+            @media (min-width: 960px) {
+              width: 100vw;
+              min-height: 100vh;
+            }
+            &:nth-of-type(1) {
+              background: url('/images/img08.webp') no-repeat center center / cover;
+              background-color: rgba(0, 0, 0, .9);
+              background-blend-mode: darken;
+            }
+            &:nth-of-type(2) {
+              background: url('/images/img09.webp') no-repeat center center / cover;
+              background-color: rgba(0, 0, 0, .9);
+              background-blend-mode: darken;
+            }
+            &:nth-of-type(3) {
+              background: url('/images/img10.webp') no-repeat center center / cover;
+              background-color: rgba(0, 0, 0, .9);
+              background-blend-mode: darken;
+            }
+          }
+        }
+      }
+    }
+
+    .contact {
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      align-content: center;
+      padding: var(--space-scaled);
+      a {
+        color: var(--color-accent);
+        border: 1px solid var(--color-accent);
+        padding: var(--font-size-1);
+        margin: var(--font-size-1) 0;
+        font-weight: var(--font-bold);
+        width: 15rem;
+        text-align: center;
+        span {
+          display: block;
+        }
+      }
+      .line-top, .line-bottom {
+        width: 0;
+        height: 1px;
+        background: var(--color-dimmed);
+        margin: var(--space-scaled) 0;
+      }
+    }
+
+    footer {
+      width: 100%;
+      min-height: 100vh;
+      background: var(--color-dimmed);
+    }
+
+    .webgl {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      z-index: 1;
+    }
+
+    .loader-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--color-background);
+      display: grid;
+      place-content: center;
+      transition: 1s transform easy-out;
+      z-index: 100;
+    }
+    .loader-hide {
+      transform: translateY(-100%);
+    }
+  }
+</style>

@@ -1,0 +1,154 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-10', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const middle = this.querySelector('.middle') as HTMLElement
+    const aArr = [...this.querySelectorAll('a')] as HTMLElement[]
+    const imgArr = [...this.querySelectorAll('img')] as HTMLElement[]
+    const lineArr = [...this.querySelectorAll('.line')] as HTMLElement[]
+    const h6Arr = [...this.querySelectorAll('h6')] as HTMLElement[]
+    const pArr = [...this.querySelectorAll('p')] as HTMLElement[]
+    
+    gsap.set(imgArr, {
+      clipPath: 'polygon(0 0, 100% 0, 100% 100%, 0% 100%)'
+    })
+
+    const tl1 = gsap.timeline({
+      scrollTrigger: {
+        trigger: middle,
+        start: '0 25%',
+        end: '100% 0%',
+        toggleActions: 'play none play reverse',
+      },
+      defaults: {
+        ease: 'expo.inOut',
+        stagger: .1
+      }
+    })
+
+    tl1
+      .from(aArr, {
+        scaleY: 0,
+        delay: .2,
+        duration: 2
+      })
+      .from(lineArr, {
+        scaleX: 0
+      }, '-=.8')
+      .from(h6Arr, {
+        yPercent: 100,
+      }, '-=.8')
+      .from(pArr, {
+        yPercent: 100,
+      }, '-=.9')
+      
+      
+    aArr.forEach(a => {
+      const img = a.querySelector('img') as HTMLElement
+
+      let tl = gsap.timeline({
+        defaults: {
+          ease: 'expo.out',
+          duration: 1,
+        }
+      })
+      tl.to(img, {
+          clipPath: 'polygon(0 25%, 100% 0, 100% 75%, 0% 100%)',
+        })
+        .pause()
+
+      a.onmouseenter = () => tl.play()
+      a.onmouseleave = () => tl.reverse()
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-10>
+    <section></section>
+    <section class="middle">
+      <a href="#">
+        <img src="/images/img04.webp" alt="Abstract image">
+        <div class="line"></div>
+        <div class="text">
+          <div class="mask"><h6>01</h6></div>
+          <div class="mask"><p>vinna</p></div>
+        </div>
+      </a>
+      <a href="#">
+        <img src="/images/img05.webp" alt="Abstract image">
+        <div class="line"></div>
+        <div class="text">
+          <div class="mask"><h6>02</h6></div>
+          <div class="mask"><p>íþrótt</p></div>
+        </div>
+      </a>
+      <a href="#">
+        <img src="/images/img06.webp" alt="Abstract image">
+        <div class="line"></div>
+        <div class="text">
+          <div class="mask"><h6>03</h6></div>
+          <div class="mask"><p>sǫgn</p></div>
+        </div>
+      </a>
+      <a href="#">
+        <img src="/images/img07.webp" alt="Abstract image">
+        <div class="line"></div>
+        <div class="text">
+          <div class="mask"><h6>04</h6></div>
+          <div class="mask"><p>venja</p></div>
+        </div>
+      </a>
+    </section>
+    <section></section>
+  </exp-10>
+</MainLayout>
+
+<style>
+  exp-10 {
+    width: 100%;
+    height: 100vh;
+    section {
+      height: 100vh;
+      padding: var(--space-scaled);
+      &.middle {
+        display: grid;
+        @media (min-width: 960px) {
+          grid-template-columns: 1fr 1fr 1fr 1fr;
+          align-items: center;
+          gap: var(--font-size-3);
+        }
+        a {
+          display: block;
+          cursor: pointer;
+          color: var(--color-text);
+          img {
+            width: 100%;
+          }
+          .line {
+            width: 100%;
+            height: 1px;
+            background: var(--color-accent);
+            margin: calc(var(--font-size-1) / 2) 0;
+          }
+          .text {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+          }
+        }
+      }
+    }
+  }
+</style>

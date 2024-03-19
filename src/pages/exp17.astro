@@ -1,0 +1,108 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { Flip } from 'gsap/Flip'
+
+gsap.registerPlugin(Flip)
+
+customElements.define('exp-17', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const moon = this.querySelector('.moon') as HTMLElement
+    const sun = this.querySelector('.sun') as HTMLElement
+    const div = this.querySelector('div') as HTMLElement
+    const span = this.querySelector('span') as HTMLElement
+    
+    let day  = false
+    
+    this.onclick = () => {
+      const stateDiv = Flip.getState(div, { props: 'background' })
+      const stateSpan = Flip.getState(span, { props: 'background, border' })
+
+      if (day) {
+        moon.appendChild(div)
+        day =  !day
+      } else {
+        sun.appendChild(div)
+        day = !day
+      }
+
+      Flip.from(stateDiv, {
+        duration: 1,
+        ease: 'expo.inOut'
+      })
+      Flip.from(stateSpan, {
+        duration: 1,
+        ease: 'expo.inOut'
+      })
+    }
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-17>
+    <section class="moon">
+      <div><span></span></div>
+    </section>
+    <section class="sun">
+    </section>
+  </exp-17>
+</MainLayout>
+
+<style>
+  exp-17 {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    section {
+      display: grid;
+      place-content: center;
+      &.moon {
+        background: var(--color-background);
+        div {
+          width: 10vw;
+          height: 10vw;
+          border-radius: 10vw;
+          background: var(--color-text);
+          position: relative;
+          span {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 8vw;
+            height: 8vw;
+            border-radius: 8vw;
+            border: 0vw dotted var(--color-background);
+            background: var(--color-background);
+          }
+        }
+      }
+      &.sun {
+        background: var(--color-dimmed);
+        div {
+          width: 10vw;
+          height: 10vw;
+          border-radius: 10vw;
+          background: var(--color-accent);
+          position: relative;
+          span {
+            position: absolute;
+            top: -2.5vw;
+            right: -2.5vw;
+            width: 15vw;
+            height: 15vw;
+            border-radius: 15vw;
+            border: 1vw dotted var(--color-accent);
+            background: transparent;
+          }
+        }
+      }
+    }
+  }
+</style>

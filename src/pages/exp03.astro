@@ -1,0 +1,103 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+
+customElements.define('exp-03', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    let imgArr = [...this.querySelectorAll('img')] as HTMLElement[]
+    let h3Arr = [...this.querySelectorAll('h3')] as HTMLElement[]
+
+    let scaleDownAndFadeIn = () => {
+      gsap.to(imgArr, {
+        scale: 1,
+        duration: 1
+      })
+      gsap.fromTo(h3Arr, 
+        {
+          y: -50,
+        },
+        {
+          duration: 2,
+          stagger: .3,
+          y: 50,
+          opacity: 1
+        }
+      )
+    }
+
+    gsap.set(imgArr, {
+      y: '-100%'
+    })
+    gsap.set(h3Arr, {
+      opacity: 0
+    })
+
+    gsap.to(imgArr, {
+      ease: "expo.out",
+      duration: 2,
+      delay: .5,
+      stagger: .1,
+      y: 0,
+      scale: 1.2,
+      onComplete: scaleDownAndFadeIn
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-03>
+    <section>
+      <div class="mask">
+        <img src="/images/img01.webp" alt="Abstract image">
+        <h3>dugr</h3>
+      </div>
+      <div class="mask">
+        <img src="/images/img02.webp" alt="Abstract image">
+        <h3>frami</h3>
+      </div>
+      <div class="mask">
+        <img src="/images/img03.webp" alt="Abstract image">
+        <h3>máttr</h3>
+      </div>
+    </section>
+  </exp-03>
+</MainLayout>
+
+<style>
+  exp-03 {
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    place-content: center;
+    padding: calc(var(--space-scaled) * 4);
+    section {
+      width: 100%;
+      height: 50vh;
+      display: flex;
+      align-items: center;
+      gap: var(--font-size-3);
+      .mask {
+        display: grid;
+        place-items: center;
+        position: relative;
+        overflow: hidden;
+        img {
+          width: 100%;
+        }
+        h3 {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          color: var(--color-accent);
+        }
+      }
+    }
+  }
+</style>

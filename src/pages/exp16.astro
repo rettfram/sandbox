@@ -1,0 +1,114 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-16', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const h1 = this.querySelector('h1') as HTMLElement
+    const imgArr = [...this.querySelectorAll('img')] as HTMLElement[]
+
+    h1.innerHTML = h1.innerText
+      .split('')
+      .map(char => char.match(/\s/) === null ? `<span style="display: inline-block">${char}</span>` : char)
+      .join('')
+
+    const spanArr = [...h1.querySelectorAll('span')] as HTMLElement[]
+
+    spanArr.forEach((span, index) => {
+      const randomYpercent = -1 * Math.random() * (1000 - 100) + 100
+
+      const tl1 = gsap.timeline({
+        scrollTrigger: {
+          trigger: h1,
+          start: '0% 100%',
+          end: '100% 50%',
+          scrub: 1
+        }
+      })
+
+      tl1
+      .fromTo(span,
+      {
+        yPercent: randomYpercent,
+      },
+      {
+        yPercent: 0,
+      })
+    })
+
+    imgArr.forEach(img => {
+      const speed = img.dataset.speed
+
+      const tl2 = gsap.timeline({
+        scrollTrigger: {
+          trigger: img,
+          start: '0% 100%',
+          // end: '100% 100%',
+          scrub: 1
+        }
+      })
+
+      tl2
+      .to(img, {
+        yPercent: +speed * 50,
+        ease: 'none'
+      })
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-16>
+    <section></section>
+    <section class="middle">
+      <h1>myrkfælinn</h1>
+      <img src="/images/img17.webp" alt="Abstract image" data-speed="-6">
+      <img src="/images/img18.webp" alt="Abstract image" data-speed="-4">
+      <img src="/images/img19.webp" alt="Abstract image" data-speed="-2">
+      <img src="/images/img20.webp" alt="Abstract image" data-speed="-8">
+    </section>
+    <section></section>
+  </exp-16>
+</MainLayout>
+
+<style>
+  exp-16 {
+    width: 100%;
+    min-height: 100vh;
+    section {
+      width: 100%;
+      height: 100vh;
+      display: grid;
+      place-content: center;
+      &.middle {
+        position: relative;
+        img {
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 10%;
+          aspect-ratio: 1/1;
+          object-fit: cover;
+          z-index: -1;
+          &:nth-of-type(1) { top: 20%; left: 40% }
+          &:nth-of-type(2) { top: 30%; left: 55%; z-index: 1 }
+          &:nth-of-type(3) { top: 35%; left: 10% }
+          &:nth-of-type(4) { top: 40%; left: 80% }
+        }
+        h1 {
+          letter-spacing: calc(var(--font-size-1) / 2);
+          color: var(--color-accent);
+        }
+      }
+    }
+  }
+</style>

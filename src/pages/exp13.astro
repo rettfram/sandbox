@@ -1,0 +1,99 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+customElements.define('exp-13', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const slider = this.querySelector('.slider') as HTMLElement
+    const sectionArr = [...this.querySelectorAll('.slider section')] as HTMLElement[]
+
+    let scrollTween = gsap.to(sectionArr, {
+      x: -slider.offsetWidth + window.innerWidth,
+      ease: 'none',
+      scrollTrigger: {
+        trigger: slider,
+        pin: true,
+        scrub: 1,
+        // snap: 1 / (sectionArr.length - 1),
+        end: () => '+=' + slider.offsetWidth
+      }
+    })
+    
+    sectionArr.forEach(section => {
+      const h2 = section.querySelector('h2') as HTMLElement
+
+      gsap.from(h2, {
+        opacity: 0,
+        skewX: 45,
+        scrollTrigger: {
+          trigger: h2,
+          containerAnimation: scrollTween,
+          start: '0 60%',
+          toggleActions: 'play none none reverse'
+        }
+      })
+    })
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-13>
+    <section><h2>hagliga</h2></section>
+    <div class="scroll-outer">
+      <div class="scroll-inner">
+        <div class="slider">
+          <section>
+            <h2>aukaþis</h2>
+          </section>
+          <section>
+            <h2>kæra</h2>
+          </section>
+          <section>
+            <h2>akarn</h2>
+          </section>
+        </div>
+      </div>
+    </div>
+    <section><h2>thriflēkr</h2></section>
+  </exp-13>
+</MainLayout>
+
+<style>
+  exp-13 {
+    width: 100%;
+    min-height: 100vh;
+    display: grid;
+    place-content: center;
+    section {
+      width: 100%;
+      min-height: 100vh;
+      display: grid;
+      place-content: center;
+    }
+    .scroll-outer {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      .scroll-inner {
+        .slider {
+          display: flex;
+          section {
+            min-width: 100vw;
+            height: calc(100vh - 10px);
+            display: grid;
+            place-content: center;
+          }
+        }
+      }
+    }
+  }
+</style>

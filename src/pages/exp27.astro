@@ -1,0 +1,97 @@
+---
+import MainLayout from '../layouts/MainLayout.astro'
+---
+
+<script>
+customElements.define('exp-27', class extends HTMLElement {
+  constructor() { super() }
+
+  connectedCallback() {
+    const track = this.querySelector('.track') as HTMLElement
+    const imgArr = [...this.querySelectorAll('img')] as HTMLElement[]
+
+    const handleOnDown = event => track.dataset.mouseDownAt = event.clientX
+
+    const handleOnUp = event => {
+      track.dataset.mouseDownAt = "0"  
+      track.dataset.prevPercentage = track.dataset.percentage
+    }
+
+    const handleOnMove = event => {
+      if(track.dataset.mouseDownAt === "0") return
+      
+      const mouseDelta = parseFloat(track.dataset.mouseDownAt) - event.clientX
+      const maxDelta = window.innerWidth
+      
+      const percentage = (mouseDelta / maxDelta) * -100
+      const nextPercentageUnconstrained = parseFloat(track.dataset.prevPercentage) + percentage
+      const nextPercentage = Math.max(Math.min(nextPercentageUnconstrained, 0), -100)
+      
+      track.dataset.percentage = String(nextPercentage)
+      
+      track.animate({
+        transform: `translate(${nextPercentage}%, -50%)`
+      }, { duration: 1200, fill: "forwards" })
+      
+      imgArr.forEach(img => {
+        img.animate({
+          objectPosition: `${100 + nextPercentage}% center`
+        }, { duration: 1200, fill: "forwards" })
+      })
+    }
+
+    window.onmousedown = event => handleOnDown(event)
+    window.ontouchstart = event => handleOnDown(event.touches[0])
+    window.onmouseup = event => handleOnUp(event)
+    window.ontouchend = event => handleOnUp(event.touches[0])
+    window.onmousemove = event => handleOnMove(event)
+    window.ontouchmove = event => handleOnMove(event.touches[0])
+  }
+})
+</script>
+
+<MainLayout>
+  <exp-27>
+    <section class="track" data-mouse-down-at="0" data-prev-percentage="0">
+      <img src="/images/img01.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img02.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img03.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img04.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img05.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img06.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img07.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img08.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img09.webp" alt="Abstract image" draggable="false">
+      <img src="/images/img10.webp" alt="Abstract image" draggable="false">
+    </section>
+  </exp-27>
+</MainLayout>
+
+<style>
+  body {
+    overflow: hidden;
+  }
+  exp-27 {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    section {
+      display: flex;
+      gap: var(--space-scaled);
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(0%, -50%);
+      cursor: grab;
+      &:active {
+        cursor: grabbing;
+      }
+      img {
+        width: 40vmin;
+        height: 60vmin;
+        object-fit: cover;
+        object-position: 100% center;
+      }
+    }
+  }
+</style>
